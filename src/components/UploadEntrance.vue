@@ -2,27 +2,24 @@
     <el-container style="height: 100%">
         <el-header>
             <el-menu mode="horizontal" background-color="#005E27">
-                <el-menu-item index="0">
-                    <img style="width: 120px" :src="logoImage" />
-                </el-menu-item>
-                <el-menu-item style="width: "> <h1 class="title-font">便携式实时智能排汗检测</h1> </el-menu-item>
+                <el-menu-item :ellipsis="false"> <img style="width: 140px" :src="logoImage" /> </el-menu-item>
             </el-menu>
         </el-header>
 
         <!-- main -->
         <el-main>
             <div class="container">
-                <!-- image -->
-                <el-image class="picture" fit="contain" style="width: auto" :src="pictureUrl" alt="Picture Not Found"></el-image>
-                <!-- upload -->
-                <el-upload class="upload" action="#" :auto-upload="false" :show-file-list="false" :on-change="handlePhoto">
-                    <template #trigger>
-                        <el-button class="photo-button">photo</el-button>
-                    </template>
-                </el-upload>
+                <div style="margin-bottom: 20px">
+                    <h1 class="title">便携式实施智能</h1>
+                    <h1 class="title">排汗检测系统</h1>
+                </div>
+                <el-button class="button" color="green">拍照检测</el-button>
+                <el-button class="button" style="margin: 20px" color="green">系统介绍</el-button>
             </div>
         </el-main>
-        <el-footer style="height: 0%"></el-footer>
+        <el-footer>
+            <span class="comment">v1.0.0 made by xxx</span>
+        </el-footer>
     </el-container>
 </template>
 
@@ -47,11 +44,21 @@ export default {
 .el-header {
     padding: 0;
 }
-.title-font {
-    font-size: 12px;
-}
 .el-main {
+    display: flex;
+    justify-content: center;
     background: #dcdfe6;
+}
+.button {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    max-height: 40px;
+    /* max-width: 80px; */
+    margin: 20px;
+    padding: 0px;
+
+    font-size: 18px;
 }
 .upload {
     display: flex;
@@ -64,9 +71,36 @@ export default {
     background-color: green;
 }
 .container {
-    padding: 5px;
-    width: 95%;
-    /* padding: 10px; */
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    padding: 50px 15px 0px 15px;
+
+    margin-top: 15%;
+    margin-bottom: 15%;
+    max-width: 80%;
+    width: 700px;
+    height: 300px;
+    border-radius: 5px;
+    background: white;
+}
+.title {
+    font-size: 28px;
+    text-align: center;
+    margin: 0;
+}
+.el-footer {
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+    justify-self: center;
+    height: 5%;
+    background-color: #dcdfe6;
+}
+.comment {
+    color: grey;
+    text-align: center;
 }
 .picture {
     min-width: 100%;
