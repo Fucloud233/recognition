@@ -19,10 +19,12 @@
                 </div>
 
                 <div class="photo-page" v-show="this.isPhotoing">
-                    <div class="photo-container">
-                        <video ref="video" id="videoCamera" v-if="!hasPhotoed"></video>
-                        <canvas ref="canvas" style="display: none" id="canvasCamera"></canvas>
-                        <el-image :src="this.recognizedPhoto" v-if="hasPhotoed"></el-image>
+                    <div class="border" v-if="!hasPhotoed">
+                        <video ref="video" id="camera"></video>
+                        <canvas ref="canvas" style="display: none" :width="this.videoWidth" :height="this.videoHeight" id="canvasCamera"></canvas>
+                    </div>
+                    <div class="border" v-if="hasPhotoed">
+                        <el-image id="recognition-result" :fit="contain" :src="this.recognizedPhotoUrl"></el-image>
                     </div>
                     <div class="operation-container">
                         <el-button class="back-button" v-on:click="handleBack" circle>
@@ -43,7 +45,7 @@
 
 <script>
 // eslint-disable-next-line no-unused-vars
-import { recognize } from '@/api.js'
+import { recognize, check } from '@/api.js'
 // eslint-disable-next-line no-unused-vars
 import { Select, ArrowLeft } from '@element-plus/icons-vue'
 
@@ -55,9 +57,9 @@ export default {
             // isPhotoing: true,
             isPhotoing: false,
             hasPhotoed: false,
-            recognizedPhoto: null,
-            videoWidth: 256,
-            videoHeight: 192
+            recognizedPhotoUrl: null,
+            videoWidth: 300,
+            videoHeight: 400
         }
     },
     components: {
@@ -67,25 +69,33 @@ export default {
     methods: {
         // https://blog.csdn.net/m0_72196169/article/details/134451422
         // eslint-disable-next-line no-unused-vars
-        handlePhoto() {
+        async handlePhoto() {
             const video = this.$refs.video
             const canvas = this.$refs.canvas
             const context = canvas.getContext('2d')
 
-            context.drawImage(video, 0, 0, this.videoWidth, this.videoHeight)
-            // eslint-disable-next-line no-unused-vars
+            context.drawImage(video, 0, 0, canvas.width, canvas.height)
             const dataUrl = canvas.toDataURL('image/jpeg')
 
-            // eslint-disable-next-line no-unused-vars
-            var result,
-                // eslint-disable-next-line no-unused-vars
-                flag = recognize(dataUrl)
-            this.hasPhotoed = true
-            this.recognizedPhoto = result
-
-            if (flag) {
-                console.log('ok')
+            let result = await recognize(dataUrl)
+            if (!result.flag) {
+                this.isPhotoing = false
+                alert(result.data)
+                return
             }
+
+            this.recognizedPhotoUrl = result.data
+            this.hasPhotoed = true
+        },
+        async handleTest() {
+            let result = await check()
+            if (!result.flag) {
+                alert(result.data)
+            }
+
+            const blobUrl = window.URL.createObjectURL(new Blob([result.data], { type: 'image/jpeg' }))
+            this.recognizedPhotoUrl = blobUrl
+            this.hasPhotoed = true
         },
         handleBack() {
             this.isPhotoing = false
@@ -102,9 +112,10 @@ export default {
             var constraints = {
                 audio: false,
                 video: {
-                    // facingMode: { exact: 'environment' },
-                    width: this.videoWidth,
-                    height: this.videoHeight,
+                    facingMode: { exact: 'environment' },
+                    // reverse width and height will be ok
+                    width: this.videoHeight,
+                    height: this.videoWidth,
                     transform: 'scaleX(-1)'
                 }
             }
@@ -185,12 +196,13 @@ export default {
     max-height: 70%;
     height: 900px;
 }
-
-#videoCamera {
+#camera {
     flex: 1;
+    background-color: black;
     width: 100%;
-    border: 5px solid green;
-    margin-bottom: 20px;
+}
+#recognition-result {
+    flex: 1;
 }
 .operation-container {
     display: flex;
@@ -215,20 +227,9 @@ export default {
     color: grey;
     text-align: center;
 }
-.picture {
-    min-width: 100%;
-    max-width: 100%;
-    height: 400px;
-    background: white;
-    border: 3px solid green;
-    /* background-color: grey; */
-}
-.image-slot {
+.border {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100%;
-    font-size: 30px;
+    border: 3px solid green;
+    padding: 0;
 }
 </style>
