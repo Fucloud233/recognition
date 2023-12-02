@@ -2,47 +2,79 @@
 /* eslint-disable no-unreachable */
 import axios from 'axios'
 
-const URL = 'http://127.0.0.1:6060'
-
 function getApiUrl(name) {
-    return URL + '/' + name
+    return '/api/' + name
 }
 
 // https://blog.csdn.net/Jensen_Yao/article/details/83312046
-function dataURLtoBlob(baseurl) {
-    let arr = baseurl.split(','),
-        mime = arr[0].match(/:(.*?);/)[1],
-        bstr = atob(arr[1]),
-        n = bstr.length,
-        u8arr = new Uint8Array(n)
-    while (n--) {
-        u8arr[n] = bstr.charCodeAt(n)
+function dataUrlToBlob(dataUrl) {
+    const [header, data] = dataUrl.split(',')
+    const [, type] = header.match(/^data:(.*?);base64$/)
+    const decodedData = atob(data)
+    const buffer = new ArrayBuffer(decodedData.length)
+    const view = new Uint8Array(buffer)
+
+    for (let i = 0; i < decodedData.length; i++) {
+        view[i] = decodedData.charCodeAt(i)
     }
-    return new Blob([u8arr], { type: mime })
+
+    return new Blob([view], { type })
 }
 
-export function recognize(imageUrl) {
+// check api is ok
+export async function check() {
+    const apiUrl = getApiUrl('check')
+
+    return await axios({
+        method: 'get',
+        url: apiUrl,
+        responseType: 'blob'
+    }).then((resp) => {
+        return {
+            data: resp.data,
+            flag: true
+        }
+    })
+}
+
+export async function recognize(imageUrl) {
     const apiUrl = getApiUrl('recognize')
 
     // https://blog.csdn.net/weixin_41786574/article/details/105015565
     const formData = new FormData()
-    formData.append('image', dataURLtoBlob(imageUrl))
-    return axios({
+    formData.append('image', dataUrlToBlob(imageUrl))
+
+    return await axios({
         method: 'post',
         url: apiUrl,
         headers: {
             'Content-Type': 'application/form-data'
-        }
+        },
+        // you must set responseType as blob
+        // otherwise it must failure
+        responseType: 'blob',
+        data: formData
     })
-        .then((data) => {
-            if (data.headers['Content-Type'] == 'json') {
-                console.log(data.data)
+        .then((resp) => {
+            // convert image file into URL
+            const blobUrl = window.URL.createObjectURL(new Blob([resp.data], { type: 'image/jpeg' }))
+            return {
+                data: blobUrl,
+                flag: true
             }
-            console.log('ok')
-            const blobUrl = window.URL.createObjectURL(data.data)
-            return blobUrl
         })
         .catch((err) => {
-            return null, false
+            let resp = err.response
+            if (resp === undefined) {
+                console.log(err)
+                return {
+                    data: err,
+                    flag: false
+                }
+            }
+            return {
+                data: resp.data,
+                flag: false
+            }
         })
 }
