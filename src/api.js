@@ -68,7 +68,7 @@ export async function recognize(imageUrl) {
             if (resp === undefined) {
                 console.log(err)
                 return {
-                    data: err,
+                    data: 'Network Error!',
                     flag: false
                 }
             }
