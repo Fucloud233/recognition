@@ -46,7 +46,7 @@
             </div>
         </el-main>
         <el-footer>
-            <span class="comment">v1.0.0 made by xxx</span>
+            <span class="comment">v1.0.0 made by HY Chen</span>
         </el-footer>
     </el-container>
 </template>
