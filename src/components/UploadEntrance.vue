@@ -153,16 +153,16 @@ export default {
 
             const userAgent = navigator.userAgent.toLowerCase()
 
-            if (userAgent.match('iphone')) {
+            if (userAgent.match('windows')) {
+                constraints.video = {
+                    width: this.videoWidth,
+                    height: this.videoHeight
+                }
+            } else {
                 constraints.video = {
                     facingMode: { exact: 'environment' },
                     width: this.videoHeight,
                     height: this.videoWidth
-                }
-            } else if (userAgent.match('windows')) {
-                constraints.video = {
-                    width: this.videoWidth,
-                    height: this.videoHeight
                 }
             }
 
@@ -208,7 +208,7 @@ export default {
 }
 .button {
     flex: 1;
-    width: 400px;
+    width: 100%;
     max-width: 400px;
     height: 200px;
     margin: 0 20px;
